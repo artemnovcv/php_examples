@@ -1,0 +1,16 @@
+CREATE DEFINER=`root`@`%` PROCEDURE `tests`(lvl_r int unsigned)
+BEGIN
+	declare amount int unsigned default 0;
+	declare cntr int unsigned;
+    declare id_r int unsigned;
+    
+    set id_r := lvl_r + 3;
+    
+	set amount := (select count(*) from tests where tests.lvl = lvl_r);
+    if(amount < 100) then
+		set cntr = (select counter from counters where id = id_r);
+		insert into tests(id,lvl) select id,lvl_r from tests_sc where id > cntr limit 100;
+        update counters set counter = (select max(id) from tests where lvl = lvl_r) where id = id_r;
+    end if;
+    select a.id, a.dom, b.val, c.bfe from doms a join tests b join tests_sc c on a.id = b.id and c.id = b.id and b.lvl = lvl_r order by b.id limit 100;
+END
